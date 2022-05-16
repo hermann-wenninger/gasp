@@ -18,9 +18,12 @@
     <div id="demo">
 
         <img class="start" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
+        <img class="start2" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
+        
 </div>
 <script>
-    gsap.to('.start', { duration: 4, x: 400, y: 400, borderRadius:'45%',border:'5px solid red', ease:'elastic' }); 
+    gsap.to('.start', { duration: 4, x: 800, y: 300, borderRadius:'45%',border:'5px solid red', ease:'elastic' }); 
+    gsap.fromTo(".start2", { width: 110, height: 110 }, { duration: 1.5, width: 500, height: 400 });
 </script>
 </body>
 </html>
