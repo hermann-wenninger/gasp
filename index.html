@@ -10,7 +10,17 @@
 #demo {
     height: 100vh;
     width: 100vw;
-  
+  padding:0px;
+  margin: 0px;
+  box-sizing: border-box;
+}
+img {
+    margin:-20px;
+}
+.box {
+  background-color: rgb(227, 25, 58);
+    height: 30px;
+    width: 30px;
 }
 
 </style>
@@ -18,7 +28,14 @@
 <body>
   
     <div id="demo">
-
+<div class="box green"></div>
+<div class="box orange"></div>
+<div class="box grey"></div>
+<div class="box pink"></div>
+<div class="box green"></div>
+<div class="box orange"></div>
+<div class="box grey"></div>
+<div class="box pink"></div>
         <img class="start" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
         <img class="start2" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
         <img class="start3" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
@@ -26,6 +43,27 @@
 <script>
     gsap.to('.start', { duration: 4, x: 800, y: 300, borderRadius:'45%',border:'5px solid red', ease:'elastic' }); 
     gsap.fromTo(".start2", { width: 110, height: 110 }, { duration: 1.5, width: 500, height: 400 });
+    gsap.from(".box", {
+            duration: 2,
+            scale: 0.5,
+            opacity: 0,
+            delay: 0.5,
+            stagger: 0.2,
+            ease: "elastic",
+            force3D: true
+        });
+
+        document.querySelectorAll(".box").forEach(function (box) {
+            box.addEventListener("click", function () {
+                gsap.to(".box", {
+                    duration: 0.5,
+                    opacity: 0,
+                    y: 30,
+                    stagger: 1.1,
+                    ease: "back.in"
+                });
+            });
+        });
 </script>
 </body>
 </html>
