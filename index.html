@@ -10,7 +10,11 @@
 #demo {
     height: 100vh;
     width: 100vw;
+    display:flex;
+    flex-direction: row;
+    flex-basis: content;
 }
+
 </style>
 </head>
 <body>
@@ -19,7 +23,7 @@
 
         <img class="start" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
         <img class="start2" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
-        
+        <img class="start3" src="assets/doharWebdesign.jpg" alt="logo creative monsters">
 </div>
 <script>
     gsap.to('.start', { duration: 4, x: 800, y: 300, borderRadius:'45%',border:'5px solid red', ease:'elastic' }); 
