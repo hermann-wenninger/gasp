@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+
+        function Ball(radius, color) {
+            this.radius = radius;
+            this.color = color;
+            this.x = 0;
+            this.y = 0;
+            this.vx = 0;
+            this.vy = 0;
+        }
+        Ball.prototype.draw = function (context) {
+            context.fillStyle = this.color;
+            context.beginPath();
+            context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, true);
+            context.closePath();
+            context.fill();
+        };
+    </script>
+</body>
+
+</html>
