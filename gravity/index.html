@@ -29,13 +29,14 @@
         };
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
+        
         var ball = new Ball(50, '#0000ff');
         ball.x = 100;
         ball.y = 100;
         ball.draw(context);
 
         for(i=0; i<100; i++){
-          ball[i]=new Ball(50+i,'#ff0000');
+          ball[i]=new Ball(50+(i*5),'#ff0000');
           ball[i].x = 100*i;
           ball[i].y = 100*i; 
           ball[i].draw(context); 
