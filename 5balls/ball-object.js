@@ -6,7 +6,12 @@ ball.x = 100;
 ball.y = 100;
 ball.draw(context);
 
+
+
+
+
 function init() {
+    var numBalls=5;
     balls = new Array();
     for (var i = 0; i < numBalls; i++) {
         var ball = new Ball(radius, color);
@@ -20,6 +25,7 @@ function init() {
     setInterval(onEachStep, 1000 / 60); // 60 fps
 };
 function onEachStep() {
+    var numBalls=5;
     context.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0; i < numBalls; i++) {
         var ball = balls[i];
@@ -36,4 +42,4 @@ function onEachStep() {
         ball.draw(context);
     }
 };
-init();
+window.onload = init; 
