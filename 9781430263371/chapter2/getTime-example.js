@@ -21,11 +21,12 @@ function animFrame(){
 }
  
 function onEachStep() {
-  var t1 = new Date().getTime(); // current time in milliseconds since midnight on 1 Jan 1970	
+  var t1 = new Date().getTime();	
   dt = 0.001*(t1-t0); // time elapsed in seconds since last call
   t0 = t1; // reset t0
   ball.x += ball.vx * dt; 
   context.clearRect(0, 0, canvas.width, canvas.height);  
   ball.draw(context); 
+  console.log(t0,t1,t0-t1);
 };
  

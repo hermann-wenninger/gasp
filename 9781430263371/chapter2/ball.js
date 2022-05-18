@@ -1,8 +1,8 @@
 function Ball (radius, color) {
   this.radius = radius;
   this.color = color;
-  this.x = 0;
-  this.y = 0;
+  this.x = 45;
+  this.y = 120;
   this.vx = 0;
   this.vy = 0;
 }
