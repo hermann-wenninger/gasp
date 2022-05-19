@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta CHARSET="utf-8">
+	<title>digital monster</title>
+	<style>
+	@-webkit-keyframes rotating /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+#a {
+  -webkit-animation: rotating 2s linear infinite;
+  -moz-animation: rotating 2s linear infinite;
+  -ms-animation: rotating 2s linear infinite;
+  -o-animation: rotating 2s linear infinite;
+  animation: rotating 2s linear infinite;
+  transform-origin: 140px 200px;
+}
+	</style>
+</head>
+
+<body>
+
+
+
+	<svg width="600" height="400">
+		<mask id="svgmask1">
+			<polygon id="a" fill="#ffffff" points="140 0, 280 400, 0 400"></polygon>
+		</mask>
+		<image  xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="doharWebdesign.jpg"
+			mask="url(#svgmask1)"></image>
+	</svg>
+
+</body>
+
+</html>
