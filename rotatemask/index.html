@@ -5,6 +5,47 @@
 	<meta CHARSET="utf-8">
 	<title>digital monster</title>
 	<style>
+    	@-webkit-keyframes rota /* Safari and Chrome */ {
+  from {
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes rotating {
+  from {
+    -ms-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -ms-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -webkit-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+#b {
+  -webkit-animation: rota 12s linear infinite;
+  -moz-animation: rota 12s linear infinite;
+  -ms-animation: rota 12s linear infinite;
+  -o-animation: rota 12s linear infinite;
+  animation: rota 12s linear infinite;
+  transform-origin: 140px 200px;
+}
+
+
+
+
+
 	@-webkit-keyframes rotating /* Safari and Chrome */ {
   from {
     -webkit-transform: rotate(0deg);
@@ -41,6 +82,19 @@
   animation: rotating 2s linear infinite;
   transform-origin: 140px 200px;
 }
+img{
+  position: absolute;
+  right:0;
+  top:0;
+  width: 10vw;
+  height: 10vh;
+  z-index: -1;
+}
+#x{
+  position: absolute;
+  right: 0;
+  top:0;
+}
 	</style>
 </head>
 
@@ -52,10 +106,21 @@
 		<mask id="svgmask1">
 			<polygon id="a" fill="#ffffff" points="140 0, 280 400, 0 400"></polygon>
 		</mask>
-		<image  xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="doharWebdesign.jpg"
+		<image id="b" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="doharWebdesign.jpg"
 			mask="url(#svgmask1)"></image>
 	</svg>
-
+  <svg width="600" height="400">
+		<mask id="svgmask2">
+			<polygon id="x" fill="#ffffff" points="140 0, 280 400, 0 400"></polygon>
+		</mask>
+   
+	</svg>
+  <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+    
+    <rect width="2" height="2">
+      <animate attributeName="rx" values="0;1;0" dur="5s" repeatCount="indefinite" />
+    </rect>
+  </svg>
 </body>
 
 </html>

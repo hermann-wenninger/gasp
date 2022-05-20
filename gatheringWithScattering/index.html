@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.js"></script>
+    
+    <style>
+        html,
+        body {
+            background-color: #F6F4F2;
+            color: #252423;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .animation-wrapper {
+            width: 80%;
+            padding-bottom: 40%;
+        }
+
+        .stagger-visualizer {
+            position: absolute;
+            width: 1100px;
+            height: 550px;
+            transform-origin: left top;
+        }
+
+        .stagger-visualizer .dots-wrapper {
+            transform: translateZ(0);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stagger-visualizer .dot {
+            position: relative;
+            z-index: 1;
+            width: 23px;
+            height: 23px;
+            margin: 16px;
+            background-color: currentColor;
+            border-radius: 50%;
+        }
+
+        @media (min-width: 740px) {
+            .stagger-visualizer .dot {
+                background-color: transparent;
+                background-image: linear-gradient(180deg, #FFFFFF 8%, #D3CDC6 100%);
+            }
+        }
+
+        .stagger-visualizer .cursor {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 37px;
+            height: 37px;
+            margin: 9px;
+            background-color: currentColor;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animation-wrapper">
+        <div class="stagger-visualizer">
+            <div class="cursor color-red"></div>
+            <div class="dots-wrapper"></div>
+        </div>
+    </div>
+    <script>
+        function fitElementToParent(el, padding) {
+            var timeout = null;
+            function resize() {
+                if (timeout) clearTimeout(timeout);
+                anime.set(el, { scale: 1 });
+                var pad = padding || 0;
+                var parentEl = el.parentNode;
+                var elOffsetWidth = el.offsetWidth - pad;
+                var parentOffsetWidth = parentEl.offsetWidth;
+                var ratio = parentOffsetWidth / elOffsetWidth;
+                timeout = setTimeout(anime.set(el, { scale: ratio }), 10);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+        }
+
+        var advancedStaggeringAnimation = (function () {
+
+            var staggerVisualizerEl = document.querySelector('.stagger-visualizer');
+            var dotsWrapperEl = staggerVisualizerEl.querySelector('.dots-wrapper');
+            var dotsFragment = document.createDocumentFragment();
+            var grid = [20, 10];
+            var cell = 55;
+            var numberOfElements = grid[0] * grid[1];
+            var animation;
+            var paused = true;
+
+            fitElementToParent(staggerVisualizerEl, 0);
+
+            for (var i = 0; i < numberOfElements; i++) {
+                var dotEl = document.createElement('div');
+                dotEl.classList.add('dot');
+                dotsFragment.appendChild(dotEl);
+            }
+
+            dotsWrapperEl.appendChild(dotsFragment);
+
+            var index = anime.random(0, numberOfElements - 1);
+            var nextIndex = 0;
+
+            anime.set('.stagger-visualizer .cursor', {
+                translateX: anime.stagger(-cell, { grid: grid, from: index, axis: 'x' }),
+                translateY: anime.stagger(-cell, { grid: grid, from: index, axis: 'y' }),
+                translateZ: 0,
+                scale: 1.5,
+            });
+
+            function play() {
+
+                paused = false;
+                if (animation) animation.pause();
+
+                nextIndex = anime.random(0, numberOfElements - 1);
+
+                animation = anime.timeline({
+                    easing: 'easeInOutQuad',
+                    complete: play
+                })
+                    .add({
+                        targets: '.stagger-visualizer .cursor',
+                        keyframes: [
+                            { scale: .75, duration: 120 },
+                            { scale: 2.5, duration: 220 },
+                            { scale: 1.5, duration: 450 },
+                        ],
+                        duration: 300
+                    })
+                    .add({
+                        targets: '.stagger-visualizer .dot',
+                        keyframes: [
+                            {
+                                translateX: anime.stagger('-2px', { grid: grid, from: index, axis: 'x' }),
+                                translateY: anime.stagger('-2px', { grid: grid, from: index, axis: 'y' }),
+                                duration: 100
+                            }, {
+                                translateX: anime.stagger('4px', { grid: grid, from: index, axis: 'x' }),
+                                translateY: anime.stagger('4px', { grid: grid, from: index, axis: 'y' }),
+                                scale: anime.stagger([2.6, 1], { grid: grid, from: index }),
+                                duration: 225
+                            }, {
+                                translateX: 0,
+                                translateY: 0,
+                                scale: 1,
+                                duration: 1200,
+                            }
+                        ],
+                        delay: anime.stagger(80, { grid: grid, from: index })
+                    }, 30)
+                    .add({
+                        targets: '.stagger-visualizer .cursor',
+                        translateX: { value: anime.stagger(-cell, { grid: grid, from: nextIndex, axis: 'x' }) },
+                        translateY: { value: anime.stagger(-cell, { grid: grid, from: nextIndex, axis: 'y' }) },
+                        scale: 1.5,
+                        easing: 'cubicBezier(.075, .2, .165, 1)'
+                    }, '-=800')
+
+                index = nextIndex;
+
+            }
+
+            play();
+
+        })();
+
+
+
+
+
+!function(n,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):n.anime=e()}(this,function(){"use strict";var n={update:null,begin:null,loopBegin:null,changeBegin:null,change:null,changeComplete:null,loopComplete:null,complete:null,loop:1,direction:"normal",autoplay:!0,timelineOffset:0},e={duration:1e3,delay:0,endDelay:0,easing:"easeOutElastic(1, .5)",round:0},t=["translateX","translateY","translateZ","rotate","rotateX","rotateY","rotateZ","scale","scaleX","scaleY","scaleZ","skew","skewX","skewY","perspective","matrix","matrix3d"],r={CSS:{},springs:{}};function a(n,e,t){return Math.min(Math.max(n,e),t)}function o(n,e){return n.indexOf(e)>-1}function u(n,e){return n.apply(null,e)}var i={arr:function(n){return Array.isArray(n)},obj:function(n){return o(Object.prototype.toString.call(n),"Object")},pth:function(n){return i.obj(n)&&n.hasOwnProperty("totalLength")},svg:function(n){return n instanceof SVGElement},inp:function(n){return n instanceof HTMLInputElement},dom:function(n){return n.nodeType||i.svg(n)},str:function(n){return"string"==typeof n},fnc:function(n){return"function"==typeof n},und:function(n){return void 0===n},nil:function(n){return i.und(n)||null===n},hex:function(n){return/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(n)},rgb:function(n){return/^rgb/.test(n)},hsl:function(n){return/^hsl/.test(n)},col:function(n){return i.hex(n)||i.rgb(n)||i.hsl(n)},key:function(t){return!n.hasOwnProperty(t)&&!e.hasOwnProperty(t)&&"targets"!==t&&"keyframes"!==t}};function c(n){var e=/\(([^)]+)\)/.exec(n);return e?e[1].split(",").map(function(n){return parseFloat(n)}):[]}function s(n,e){var t=c(n),o=a(i.und(t[0])?1:t[0],.1,100),u=a(i.und(t[1])?100:t[1],.1,100),s=a(i.und(t[2])?10:t[2],.1,100),f=a(i.und(t[3])?0:t[3],.1,100),l=Math.sqrt(u/o),d=s/(2*Math.sqrt(u*o)),p=d<1?l*Math.sqrt(1-d*d):0,v=1,h=d<1?(d*l-f)/p:-f+l;function g(n){var t=e?e*n/1e3:n;return t=d<1?Math.exp(-t*d*l)*(v*Math.cos(p*t)+h*Math.sin(p*t)):(v+h*t)*Math.exp(-t*l),0===n||1===n?n:1-t}return e?g:function(){var e=r.springs[n];if(e)return e;for(var t=0,a=0;;)if(1===g(t+=1/6)){if(++a>=16)break}else a=0;var o=t*(1/6)*1e3;return r.springs[n]=o,o}}function f(n){return void 0===n&&(n=10),function(e){return Math.ceil(a(e,1e-6,1)*n)*(1/n)}}var l,d,p=function(){var n=11,e=1/(n-1);function t(n,e){return 1-3*e+3*n}function r(n,e){return 3*e-6*n}function a(n){return 3*n}function o(n,e,o){return((t(e,o)*n+r(e,o))*n+a(e))*n}function u(n,e,o){return 3*t(e,o)*n*n+2*r(e,o)*n+a(e)}return function(t,r,a,i){if(0<=t&&t<=1&&0<=a&&a<=1){var c=new Float32Array(n);if(t!==r||a!==i)for(var s=0;s<n;++s)c[s]=o(s*e,t,a);return function(n){return t===r&&a===i?n:0===n||1===n?n:o(f(n),r,i)}}function f(r){for(var i=0,s=1,f=n-1;s!==f&&c[s]<=r;++s)i+=e;var l=i+(r-c[--s])/(c[s+1]-c[s])*e,d=u(l,t,a);return d>=.001?function(n,e,t,r){for(var a=0;a<4;++a){var i=u(e,t,r);if(0===i)return e;e-=(o(e,t,r)-n)/i}return e}(r,l,t,a):0===d?l:function(n,e,t,r,a){for(var u,i,c=0;(u=o(i=e+(t-e)/2,r,a)-n)>0?t=i:e=i,Math.abs(u)>1e-7&&++c<10;);return i}(r,i,i+e,t,a)}}}(),v=(l={linear:function(){return function(n){return n}}},d={Sine:function(){return function(n){return 1-Math.cos(n*Math.PI/2)}},Circ:function(){return function(n){return 1-Math.sqrt(1-n*n)}},Back:function(){return function(n){return n*n*(3*n-2)}},Bounce:function(){return function(n){for(var e,t=4;n<((e=Math.pow(2,--t))-1)/11;);return 1/Math.pow(4,3-t)-7.5625*Math.pow((3*e-2)/22-n,2)}},Elastic:function(n,e){void 0===n&&(n=1),void 0===e&&(e=.5);var t=a(n,1,10),r=a(e,.1,2);return function(n){return 0===n||1===n?n:-t*Math.pow(2,10*(n-1))*Math.sin((n-1-r/(2*Math.PI)*Math.asin(1/t))*(2*Math.PI)/r)}}},["Quad","Cubic","Quart","Quint","Expo"].forEach(function(n,e){d[n]=function(){return function(n){return Math.pow(n,e+2)}}}),Object.keys(d).forEach(function(n){var e=d[n];l["easeIn"+n]=e,l["easeOut"+n]=function(n,t){return function(r){return 1-e(n,t)(1-r)}},l["easeInOut"+n]=function(n,t){return function(r){return r<.5?e(n,t)(2*r)/2:1-e(n,t)(-2*r+2)/2}},l["easeOutIn"+n]=function(n,t){return function(r){return r<.5?(1-e(n,t)(1-2*r))/2:(e(n,t)(2*r-1)+1)/2}}}),l);function h(n,e){if(i.fnc(n))return n;var t=n.split("(")[0],r=v[t],a=c(n);switch(t){case"spring":return s(n,e);case"cubicBezier":return u(p,a);case"steps":return u(f,a);default:return u(r,a)}}function g(n){try{return document.querySelectorAll(n)}catch(n){return}}function m(n,e){for(var t=n.length,r=arguments.length>=2?arguments[1]:void 0,a=[],o=0;o<t;o++)if(o in n){var u=n[o];e.call(r,u,o,n)&&a.push(u)}return a}function y(n){return n.reduce(function(n,e){return n.concat(i.arr(e)?y(e):e)},[])}function b(n){return i.arr(n)?n:(i.str(n)&&(n=g(n)||n),n instanceof NodeList||n instanceof HTMLCollection?[].slice.call(n):[n])}function M(n,e){return n.some(function(n){return n===e})}function x(n){var e={};for(var t in n)e[t]=n[t];return e}function w(n,e){var t=x(n);for(var r in n)t[r]=e.hasOwnProperty(r)?e[r]:n[r];return t}function k(n,e){var t=x(n);for(var r in e)t[r]=i.und(n[r])?e[r]:n[r];return t}function O(n){return i.rgb(n)?(t=/rgb\((\d+,\s*[\d]+,\s*[\d]+)\)/g.exec(e=n))?"rgba("+t[1]+",1)":e:i.hex(n)?(r=n.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i,function(n,e,t,r){return e+e+t+t+r+r}),a=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(r),"rgba("+parseInt(a[1],16)+","+parseInt(a[2],16)+","+parseInt(a[3],16)+",1)"):i.hsl(n)?function(n){var e,t,r,a=/hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g.exec(n)||/hsla\((\d+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)/g.exec(n),o=parseInt(a[1],10)/360,u=parseInt(a[2],10)/100,i=parseInt(a[3],10)/100,c=a[4]||1;function s(n,e,t){return t<0&&(t+=1),t>1&&(t-=1),t<1/6?n+6*(e-n)*t:t<.5?e:t<2/3?n+(e-n)*(2/3-t)*6:n}if(0==u)e=t=r=i;else{var f=i<.5?i*(1+u):i+u-i*u,l=2*i-f;e=s(l,f,o+1/3),t=s(l,f,o),r=s(l,f,o-1/3)}return"rgba("+255*e+","+255*t+","+255*r+","+c+")"}(n):void 0;var e,t,r,a}function C(n){var e=/[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?(%|px|pt|em|rem|in|cm|mm|ex|ch|pc|vw|vh|vmin|vmax|deg|rad|turn)?$/.exec(n);if(e)return e[1]}function P(n,e){return i.fnc(n)?n(e.target,e.id,e.total):n}function I(n,e){return n.getAttribute(e)}function D(n,e,t){if(M([t,"deg","rad","turn"],C(e)))return e;var a=r.CSS[e+t];if(!i.und(a))return a;var o=document.createElement(n.tagName),u=n.parentNode&&n.parentNode!==document?n.parentNode:document.body;u.appendChild(o),o.style.position="absolute",o.style.width=100+t;var c=100/o.offsetWidth;u.removeChild(o);var s=c*parseFloat(e);return r.CSS[e+t]=s,s}function B(n,e,t){if(e in n.style){var r=e.replace(/([a-z])([A-Z])/g,"$1-$2").toLowerCase(),a=n.style[e]||getComputedStyle(n).getPropertyValue(r)||"0";return t?D(n,a,t):a}}function T(n,e){return i.dom(n)&&!i.inp(n)&&(!i.nil(I(n,e))||i.svg(n)&&n[e])?"attribute":i.dom(n)&&M(t,e)?"transform":i.dom(n)&&"transform"!==e&&B(n,e)?"css":null!=n[e]?"object":void 0}function E(n){if(i.dom(n)){for(var e,t=n.style.transform||"",r=/(\w+)\(([^)]*)\)/g,a=new Map;e=r.exec(t);)a.set(e[1],e[2]);return a}}function F(n,e,t,r){var a,u=o(e,"scale")?1:0+(o(a=e,"translate")||"perspective"===a?"px":o(a,"rotate")||o(a,"skew")?"deg":void 0),i=E(n).get(e)||u;return t&&(t.transforms.list.set(e,i),t.transforms.last=e),r?D(n,i,r):i}function A(n,e,t,r){switch(T(n,e)){case"transform":return F(n,e,r,t);case"css":return B(n,e,t);case"attribute":return I(n,e);default:return n[e]||0}}function N(n,e){var t=/^(\*=|\+=|-=)/.exec(n);if(!t)return n;var r=C(n)||0,a=parseFloat(e),o=parseFloat(n.replace(t[0],""));switch(t[0][0]){case"+":return a+o+r;case"-":return a-o+r;case"*":return a*o+r}}function S(n,e){if(i.col(n))return O(n);if(/\s/g.test(n))return n;var t=C(n),r=t?n.substr(0,n.length-t.length):n;return e?r+e:r}function L(n,e){return Math.sqrt(Math.pow(e.x-n.x,2)+Math.pow(e.y-n.y,2))}function j(n){for(var e,t=n.points,r=0,a=0;a<t.numberOfItems;a++){var o=t.getItem(a);a>0&&(r+=L(e,o)),e=o}return r}function q(n){if(n.getTotalLength)return n.getTotalLength();switch(n.tagName.toLowerCase()){case"circle":return o=n,2*Math.PI*I(o,"r");case"rect":return 2*I(a=n,"width")+2*I(a,"height");case"line":return L({x:I(r=n,"x1"),y:I(r,"y1")},{x:I(r,"x2"),y:I(r,"y2")});case"polyline":return j(n);case"polygon":return t=(e=n).points,j(e)+L(t.getItem(t.numberOfItems-1),t.getItem(0))}var e,t,r,a,o}function H(n,e){var t=e||{},r=t.el||function(n){for(var e=n.parentNode;i.svg(e)&&i.svg(e.parentNode);)e=e.parentNode;return e}(n),a=r.getBoundingClientRect(),o=I(r,"viewBox"),u=a.width,c=a.height,s=t.viewBox||(o?o.split(" "):[0,0,u,c]);return{el:r,viewBox:s,x:s[0]/1,y:s[1]/1,w:u,h:c,vW:s[2],vH:s[3]}}function V(n,e,t){function r(t){void 0===t&&(t=0);var r=e+t>=1?e+t:0;return n.el.getPointAtLength(r)}var a=H(n.el,n.svg),o=r(),u=r(-1),i=r(1),c=t?1:a.w/a.vW,s=t?1:a.h/a.vH;switch(n.property){case"x":return(o.x-a.x)*c;case"y":return(o.y-a.y)*s;case"angle":return 180*Math.atan2(i.y-u.y,i.x-u.x)/Math.PI}}function $(n,e){var t=/[+-]?\d*\.?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g,r=S(i.pth(n)?n.totalLength:n,e)+"";return{original:r,numbers:r.match(t)?r.match(t).map(Number):[0],strings:i.str(n)||e?r.split(t):[]}}function W(n){return m(n?y(i.arr(n)?n.map(b):b(n)):[],function(n,e,t){return t.indexOf(n)===e})}function X(n){var e=W(n);return e.map(function(n,t){return{target:n,id:t,total:e.length,transforms:{list:E(n)}}})}function Y(n,e){var t=x(e);if(/^spring/.test(t.easing)&&(t.duration=s(t.easing)),i.arr(n)){var r=n.length;2===r&&!i.obj(n[0])?n={value:n}:i.fnc(e.duration)||(t.duration=e.duration/r)}var a=i.arr(n)?n:[n];return a.map(function(n,t){var r=i.obj(n)&&!i.pth(n)?n:{value:n};return i.und(r.delay)&&(r.delay=t?0:e.delay),i.und(r.endDelay)&&(r.endDelay=t===a.length-1?e.endDelay:0),r}).map(function(n){return k(n,t)})}function Z(n,e){var t=[],r=e.keyframes;for(var a in r&&(e=k(function(n){for(var e=m(y(n.map(function(n){return Object.keys(n)})),function(n){return i.key(n)}).reduce(function(n,e){return n.indexOf(e)<0&&n.push(e),n},[]),t={},r=function(r){var a=e[r];t[a]=n.map(function(n){var e={};for(var t in n)i.key(t)?t==a&&(e.value=n[t]):e[t]=n[t];return e})},a=0;a<e.length;a++)r(a);return t}(r),e)),e)i.key(a)&&t.push({name:a,tweens:Y(e[a],n)});return t}function G(n,e){var t;return n.tweens.map(function(r){var a=function(n,e){var t={};for(var r in n){var a=P(n[r],e);i.arr(a)&&1===(a=a.map(function(n){return P(n,e)})).length&&(a=a[0]),t[r]=a}return t.duration=parseFloat(t.duration),t.delay=parseFloat(t.delay),t}(r,e),o=a.value,u=i.arr(o)?o[1]:o,c=C(u),s=A(e.target,n.name,c,e),f=t?t.to.original:s,l=i.arr(o)?o[0]:f,d=C(l)||C(s),p=c||d;return i.und(u)&&(u=f),a.from=$(l,p),a.to=$(N(u,l),p),a.start=t?t.end:0,a.end=a.start+a.delay+a.duration+a.endDelay,a.easing=h(a.easing,a.duration),a.isPath=i.pth(o),a.isPathTargetInsideSVG=a.isPath&&i.svg(e.target),a.isColor=i.col(a.from.original),a.isColor&&(a.round=1),t=a,a})}var Q={css:function(n,e,t){return n.style[e]=t},attribute:function(n,e,t){return n.setAttribute(e,t)},object:function(n,e,t){return n[e]=t},transform:function(n,e,t,r,a){if(r.list.set(e,t),e===r.last||a){var o="";r.list.forEach(function(n,e){o+=e+"("+n+") "}),n.style.transform=o}}};function z(n,e){X(n).forEach(function(n){for(var t in e){var r=P(e[t],n),a=n.target,o=C(r),u=A(a,t,o,n),i=N(S(r,o||C(u)),u),c=T(a,t);Q[c](a,t,i,n.transforms,!0)}})}function _(n,e){return m(y(n.map(function(n){return e.map(function(e){return function(n,e){var t=T(n.target,e.name);if(t){var r=G(e,n),a=r[r.length-1];return{type:t,property:e.name,animatable:n,tweens:r,duration:a.end,delay:r[0].delay,endDelay:a.endDelay}}}(n,e)})})),function(n){return!i.und(n)})}function R(n,e){var t=n.length,r=function(n){return n.timelineOffset?n.timelineOffset:0},a={};return a.duration=t?Math.max.apply(Math,n.map(function(n){return r(n)+n.duration})):e.duration,a.delay=t?Math.min.apply(Math,n.map(function(n){return r(n)+n.delay})):e.delay,a.endDelay=t?a.duration-Math.max.apply(Math,n.map(function(n){return r(n)+n.duration-n.endDelay})):e.endDelay,a}var J=0;var K=[],U=function(){var n;function e(t){for(var r=K.length,a=0;a<r;){var o=K[a];o.paused?(K.splice(a,1),r--):(o.tick(t),a++)}n=a>0?requestAnimationFrame(e):void 0}return"undefined"!=typeof document&&document.addEventListener("visibilitychange",function(){en.suspendWhenDocumentHidden&&(nn()?n=cancelAnimationFrame(n):(K.forEach(function(n){return n._onDocumentVisibility()}),U()))}),function(){n||nn()&&en.suspendWhenDocumentHidden||!(K.length>0)||(n=requestAnimationFrame(e))}}();function nn(){return!!document&&document.hidden}function en(t){void 0===t&&(t={});var r,o=0,u=0,i=0,c=0,s=null;function f(n){var e=window.Promise&&new Promise(function(n){return s=n});return n.finished=e,e}var l,d,p,v,h,g,y,b,M=(d=w(n,l=t),p=w(e,l),v=Z(p,l),h=X(l.targets),g=_(h,v),y=R(g,p),b=J,J++,k(d,{id:b,children:[],animatables:h,animations:g,duration:y.duration,delay:y.delay,endDelay:y.endDelay}));f(M);function x(){var n=M.direction;"alternate"!==n&&(M.direction="normal"!==n?"normal":"reverse"),M.reversed=!M.reversed,r.forEach(function(n){return n.reversed=M.reversed})}function O(n){return M.reversed?M.duration-n:n}function C(){o=0,u=O(M.currentTime)*(1/en.speed)}function P(n,e){e&&e.seek(n-e.timelineOffset)}function I(n){for(var e=0,t=M.animations,r=t.length;e<r;){var o=t[e],u=o.animatable,i=o.tweens,c=i.length-1,s=i[c];c&&(s=m(i,function(e){return n<e.end})[0]||s);for(var f=a(n-s.start-s.delay,0,s.duration)/s.duration,l=isNaN(f)?1:s.easing(f),d=s.to.strings,p=s.round,v=[],h=s.to.numbers.length,g=void 0,y=0;y<h;y++){var b=void 0,x=s.to.numbers[y],w=s.from.numbers[y]||0;b=s.isPath?V(s.value,l*x,s.isPathTargetInsideSVG):w+l*(x-w),p&&(s.isColor&&y>2||(b=Math.round(b*p)/p)),v.push(b)}var k=d.length;if(k){g=d[0];for(var O=0;O<k;O++){d[O];var C=d[O+1],P=v[O];isNaN(P)||(g+=C?P+C:P+" ")}}else g=v[0];Q[o.type](u.target,o.property,g,u.transforms),o.currentValue=g,e++}}function D(n){M[n]&&!M.passThrough&&M[n](M)}function B(n){var e=M.duration,t=M.delay,l=e-M.endDelay,d=O(n);M.progress=a(d/e*100,0,100),M.reversePlayback=d<M.currentTime,r&&function(n){if(M.reversePlayback)for(var e=c;e--;)P(n,r[e]);else for(var t=0;t<c;t++)P(n,r[t])}(d),!M.began&&M.currentTime>0&&(M.began=!0,D("begin")),!M.loopBegan&&M.currentTime>0&&(M.loopBegan=!0,D("loopBegin")),d<=t&&0!==M.currentTime&&I(0),(d>=l&&M.currentTime!==e||!e)&&I(e),d>t&&d<l?(M.changeBegan||(M.changeBegan=!0,M.changeCompleted=!1,D("changeBegin")),D("change"),I(d)):M.changeBegan&&(M.changeCompleted=!0,M.changeBegan=!1,D("changeComplete")),M.currentTime=a(d,0,e),M.began&&D("update"),n>=e&&(u=0,M.remaining&&!0!==M.remaining&&M.remaining--,M.remaining?(o=i,D("loopComplete"),M.loopBegan=!1,"alternate"===M.direction&&x()):(M.paused=!0,M.completed||(M.completed=!0,D("loopComplete"),D("complete"),!M.passThrough&&"Promise"in window&&(s(),f(M)))))}return M.reset=function(){var n=M.direction;M.passThrough=!1,M.currentTime=0,M.progress=0,M.paused=!0,M.began=!1,M.loopBegan=!1,M.changeBegan=!1,M.completed=!1,M.changeCompleted=!1,M.reversePlayback=!1,M.reversed="reverse"===n,M.remaining=M.loop,r=M.children;for(var e=c=r.length;e--;)M.children[e].reset();(M.reversed&&!0!==M.loop||"alternate"===n&&1===M.loop)&&M.remaining++,I(M.reversed?M.duration:0)},M._onDocumentVisibility=C,M.set=function(n,e){return z(n,e),M},M.tick=function(n){i=n,o||(o=i),B((i+(u-o))*en.speed)},M.seek=function(n){B(O(n))},M.pause=function(){M.paused=!0,C()},M.play=function(){M.paused&&(M.completed&&M.reset(),M.paused=!1,K.push(M),C(),U())},M.reverse=function(){x(),M.completed=!M.reversed,C()},M.restart=function(){M.reset(),M.play()},M.remove=function(n){rn(W(n),M)},M.reset(),M.autoplay&&M.play(),M}function tn(n,e){for(var t=e.length;t--;)M(n,e[t].animatable.target)&&e.splice(t,1)}function rn(n,e){var t=e.animations,r=e.children;tn(n,t);for(var a=r.length;a--;){var o=r[a],u=o.animations;tn(n,u),u.length||o.children.length||r.splice(a,1)}t.length||r.length||e.pause()}return en.version="3.2.1",en.speed=1,en.suspendWhenDocumentHidden=!0,en.running=K,en.remove=function(n){for(var e=W(n),t=K.length;t--;)rn(e,K[t])},en.get=A,en.set=z,en.convertPx=D,en.path=function(n,e){var t=i.str(n)?g(n)[0]:n,r=e||100;return function(n){return{property:n,el:t,svg:H(t),totalLength:q(t)*(r/100)}}},en.setDashoffset=function(n){var e=q(n);return n.setAttribute("stroke-dasharray",e),e},en.stagger=function(n,e){void 0===e&&(e={});var t=e.direction||"normal",r=e.easing?h(e.easing):null,a=e.grid,o=e.axis,u=e.from||0,c="first"===u,s="center"===u,f="last"===u,l=i.arr(n),d=l?parseFloat(n[0]):parseFloat(n),p=l?parseFloat(n[1]):0,v=C(l?n[1]:n)||0,g=e.start||0+(l?d:0),m=[],y=0;return function(n,e,i){if(c&&(u=0),s&&(u=(i-1)/2),f&&(u=i-1),!m.length){for(var h=0;h<i;h++){if(a){var b=s?(a[0]-1)/2:u%a[0],M=s?(a[1]-1)/2:Math.floor(u/a[0]),x=b-h%a[0],w=M-Math.floor(h/a[0]),k=Math.sqrt(x*x+w*w);"x"===o&&(k=-x),"y"===o&&(k=-w),m.push(k)}else m.push(Math.abs(u-h));y=Math.max.apply(Math,m)}r&&(m=m.map(function(n){return r(n/y)*y})),"reverse"===t&&(m=m.map(function(n){return o?n<0?-1*n:-n:Math.abs(y-n)}))}return g+(l?(p-d)/y:d)*(Math.round(100*m[e])/100)+v}},en.timeline=function(n){void 0===n&&(n={});var t=en(n);return t.duration=0,t.add=function(r,a){var o=K.indexOf(t),u=t.children;function c(n){n.passThrough=!0}o>-1&&K.splice(o,1);for(var s=0;s<u.length;s++)c(u[s]);var f=k(r,w(e,n));f.targets=f.targets||n.targets;var l=t.duration;f.autoplay=!1,f.direction=t.direction,f.timelineOffset=i.und(a)?l:N(a,l),c(t),t.seek(f.timelineOffset);var d=en(f);c(d),u.push(d);var p=R(u,n);return t.delay=p.delay,t.endDelay=p.endDelay,t.duration=p.duration,t.seek(0),t.reset(),t.autoplay&&t.play(),t},t},en.easing=h,en.penner=v,en.random=function(n,e){return Math.floor(Math.random()*(e-n+1))+n},en});
+
+
+// import anime from '../../../src/index.js';
+
+/* Ontersection observer */
+
+!function(t,e){"use strict";function n(t){this.time=t.time,this.target=t.target,this.rootBounds=t.rootBounds,this.boundingClientRect=t.boundingClientRect,this.intersectionRect=t.intersectionRect||a(),this.isIntersecting=!!t.intersectionRect;var e=this.boundingClientRect,n=e.width*e.height,i=this.intersectionRect,o=i.width*i.height;n?this.intersectionRatio=o/n:this.intersectionRatio=this.isIntersecting?1:0}function i(t,e){var n=e||{};if("function"!=typeof t)throw new Error("callback must be a function");if(n.root&&1!=n.root.nodeType)throw new Error("root must be an Element");this._checkForIntersections=r(this._checkForIntersections.bind(this),this.THROTTLE_TIMEOUT),this._callback=t,this._observationTargets=[],this._queuedEntries=[],this._rootMarginValues=this._parseRootMargin(n.rootMargin),this.thresholds=this._initThresholds(n.threshold),this.root=n.root||null,this.rootMargin=this._rootMarginValues.map(function(t){return t.value+t.unit}).join(" ")}function o(){return t.performance&&performance.now&&performance.now()}function r(t,e){var n=null;return function(){n||(n=setTimeout(function(){t(),n=null},e))}}function s(t,e,n,i){"function"==typeof t.addEventListener?t.addEventListener(e,n,i||!1):"function"==typeof t.attachEvent&&t.attachEvent("on"+e,n)}function h(t,e,n,i){"function"==typeof t.removeEventListener?t.removeEventListener(e,n,i||!1):"function"==typeof t.detatchEvent&&t.detatchEvent("on"+e,n)}function c(t,e){var n=Math.max(t.top,e.top),i=Math.min(t.bottom,e.bottom),o=Math.max(t.left,e.left),r=Math.min(t.right,e.right),s=r-o,h=i-n;return s>=0&&h>=0&&{top:n,bottom:i,left:o,right:r,width:s,height:h}}function u(t){var e;try{e=t.getBoundingClientRect()}catch(n){}return e?(e.width&&e.height||(e={top:e.top,right:e.right,bottom:e.bottom,left:e.left,width:e.right-e.left,height:e.bottom-e.top}),e):a()}function a(){return{top:0,bottom:0,left:0,right:0,width:0,height:0}}function l(t,e){for(var n=e;n;){if(n==t)return!0;n=p(n)}return!1}function p(t){var e=t.parentNode;return e&&11==e.nodeType&&e.host?e.host:e}if("IntersectionObserver"in t&&"IntersectionObserverEntry"in t&&"intersectionRatio"in t.IntersectionObserverEntry.prototype)return void("isIntersecting"in t.IntersectionObserverEntry.prototype||Object.defineProperty(t.IntersectionObserverEntry.prototype,"isIntersecting",{get:function(){return this.intersectionRatio>0}}));var f=[];i.prototype.THROTTLE_TIMEOUT=100,i.prototype.POLL_INTERVAL=null,i.prototype.observe=function(t){var e=this._observationTargets.some(function(e){return e.element==t});if(!e){if(!t||1!=t.nodeType)throw new Error("target must be an Element");this._registerInstance(),this._observationTargets.push({element:t,entry:null}),this._monitorIntersections(),this._checkForIntersections()}},i.prototype.unobserve=function(t){this._observationTargets=this._observationTargets.filter(function(e){return e.element!=t}),this._observationTargets.length||(this._unmonitorIntersections(),this._unregisterInstance())},i.prototype.disconnect=function(){this._observationTargets=[],this._unmonitorIntersections(),this._unregisterInstance()},i.prototype.takeRecords=function(){var t=this._queuedEntries.slice();return this._queuedEntries=[],t},i.prototype._initThresholds=function(t){var e=t||[0];return Array.isArray(e)||(e=[e]),e.sort().filter(function(t,e,n){if("number"!=typeof t||isNaN(t)||0>t||t>1)throw new Error("threshold must be a number between 0 and 1 inclusively");return t!==n[e-1]})},i.prototype._parseRootMargin=function(t){var e=t||"0px",n=e.split(/\s+/).map(function(t){var e=/^(-?\d*\.?\d+)(px|%)$/.exec(t);if(!e)throw new Error("rootMargin must be specified in pixels or percent");return{value:parseFloat(e[1]),unit:e[2]}});return n[1]=n[1]||n[0],n[2]=n[2]||n[0],n[3]=n[3]||n[1],n},i.prototype._monitorIntersections=function(){this._monitoringIntersections||(this._monitoringIntersections=!0,this.POLL_INTERVAL?this._monitoringInterval=setInterval(this._checkForIntersections,this.POLL_INTERVAL):(s(t,"resize",this._checkForIntersections,!0),s(e,"scroll",this._checkForIntersections,!0),"MutationObserver"in t&&(this._domObserver=new MutationObserver(this._checkForIntersections),this._domObserver.observe(e,{attributes:!0,childList:!0,characterData:!0,subtree:!0}))))},i.prototype._unmonitorIntersections=function(){this._monitoringIntersections&&(this._monitoringIntersections=!1,clearInterval(this._monitoringInterval),this._monitoringInterval=null,h(t,"resize",this._checkForIntersections,!0),h(e,"scroll",this._checkForIntersections,!0),this._domObserver&&(this._domObserver.disconnect(),this._domObserver=null))},i.prototype._checkForIntersections=function(){var t=this._rootIsInDom(),e=t?this._getRootRect():a();this._observationTargets.forEach(function(i){var r=i.element,s=u(r),h=this._rootContainsTarget(r),c=i.entry,a=t&&h&&this._computeTargetAndRootIntersection(r,e),l=i.entry=new n({time:o(),target:r,boundingClientRect:s,rootBounds:e,intersectionRect:a});c?t&&h?this._hasCrossedThreshold(c,l)&&this._queuedEntries.push(l):c&&c.isIntersecting&&this._queuedEntries.push(l):this._queuedEntries.push(l)},this),this._queuedEntries.length&&this._callback(this.takeRecords(),this)},i.prototype._computeTargetAndRootIntersection=function(n,i){if("none"!=t.getComputedStyle(n).display){for(var o=u(n),r=o,s=p(n),h=!1;!h;){var a=null,l=1==s.nodeType?t.getComputedStyle(s):{};if("none"==l.display)return;if(s==this.root||s==e?(h=!0,a=i):s!=e.body&&s!=e.documentElement&&"visible"!=l.overflow&&(a=u(s)),a&&(r=c(a,r),!r))break;s=p(s)}return r}},i.prototype._getRootRect=function(){var t;if(this.root)t=u(this.root);else{var n=e.documentElement,i=e.body;t={top:0,left:0,right:n.clientWidth||i.clientWidth,width:n.clientWidth||i.clientWidth,bottom:n.clientHeight||i.clientHeight,height:n.clientHeight||i.clientHeight}}return this._expandRectByRootMargin(t)},i.prototype._expandRectByRootMargin=function(t){var e=this._rootMarginValues.map(function(e,n){return"px"==e.unit?e.value:e.value*(n%2?t.width:t.height)/100}),n={top:t.top-e[0],right:t.right+e[1],bottom:t.bottom+e[2],left:t.left-e[3]};return n.width=n.right-n.left,n.height=n.bottom-n.top,n},i.prototype._hasCrossedThreshold=function(t,e){var n=t&&t.isIntersecting?t.intersectionRatio||0:-1,i=e.isIntersecting?e.intersectionRatio||0:-1;if(n!==i)for(var o=0;o<this.thresholds.length;o++){var r=this.thresholds[o];if(r==n||r==i||n>r!=i>r)return!0}},i.prototype._rootIsInDom=function(){return!this.root||l(e,this.root)},i.prototype._rootContainsTarget=function(t){return l(this.root||e,t)},i.prototype._registerInstance=function(){f.indexOf(this)<0&&f.push(this)},i.prototype._unregisterInstance=function(){var t=f.indexOf(this);-1!=t&&f.splice(t,1)},t.IntersectionObserver=i,t.IntersectionObserverEntry=n}(window,document);
+
+/* Helpers */
+
+function dragElement(el, events) {
+
+  function getPointer(e) {
+    var x = 'clientX';
+    var y = 'clientY';
+    var evt = e.touches ? e.touches[0] : e;
+    return { x: evt[x], y: evt[y] };
+  }
+
+  var drag = { x: 0, y: 0, deltaX: 0, deltaY: 0, active: true, events: events || {} };
+  var originalX = 0;
+  var originalY = 0;
+  var pointerX = 0;
+  var pointerY = 0;
+
+  function move(e) {
+    if (drag.active) return;
+    drag.deltaX = pointerX - getPointer(e).x;
+    drag.deltaY = pointerY - getPointer(e).y;
+    drag.x = originalX - drag.deltaX;
+    drag.y = originalY - drag.deltaY;
+    if (drag.events.move) drag.events.move(drag);
+  }
+
+  function release(e) {
+    drag.active = true;
+    if (drag.events.release) drag.events.release(drag);
+    document.removeEventListener('mousemove', move, false);
+    document.removeEventListener('mouseup', release, false);
+    document.removeEventListener('touchmove', move, false);
+    document.removeEventListener('touchend', release, false);
+  }
+
+  function start(e) {
+    if (!drag.active) return;
+    e.preventDefault();
+    drag.active = false;
+    pointerX = getPointer(e).x;
+    pointerY = getPointer(e).y;
+    originalX = drag.x;
+    originalY = drag.y;
+    if (drag.events.begin) drag.events.begin(drag);
+    document.addEventListener('mousemove', move, false);
+    document.addEventListener('mouseup', release, false);
+    document.addEventListener('touchmove', move, false);
+    document.addEventListener('touchend', release, false);
+  }
+
+  el.addEventListener('mousedown', start, false);
+  el.addEventListener('touchstart', start, false);
+
+  return drag;
+
+}
+
+// Better scroll events
+
+function onScroll(cb) {
+  var isTicking = false;
+  var scrollY = 0;
+  var body = document.body;
+  var html = document.documentElement;
+  var scrollHeight = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+  function scroll() {
+    scrollY = window.scrollY;
+    if (cb) cb(scrollY, scrollHeight);
+    requestTick();
+  }
+  function requestTick() {
+    if (!isTicking) requestAnimationFrame(updateScroll);
+    isTicking = true;
+  }
+  function updateScroll() {
+    isTicking = false;
+    var currentScrollY = scrollY;
+  }
+  scroll();
+  window.onscroll = scroll;
+}
+
+// Scroll to element
+
+function scrollToElement(el, offset) {
+  var off = offset || 0;
+  var rect = el.getBoundingClientRect();
+  var top = rect.top + off;
+  var animation = anime({
+    targets: [document.body, document.documentElement],
+    scrollTop: '+='+top,
+    easing: 'easeInOutSine',
+    duration: 1500
+  });
+  // onScroll(animation.pause);
+}
+
+// Check if element is in viewport
+
+function isElementInViewport(el, inCB, outCB, rootMargin) {
+  var margin = rootMargin || '-10%';
+  function handleIntersect(entries, observer) {
+    var entry = entries[0];
+    if (entry.isIntersecting) {
+      if (inCB && typeof inCB === 'function') inCB(el, entry);
+    } else {
+      if (outCB && typeof outCB === 'function') outCB(el, entry);
+    }
+  }
+  var observer = new IntersectionObserver(handleIntersect, {rootMargin: margin});
+  observer.observe(el);
+}
+
+function fitElementToParent(el, padding, exception) {
+  let windowWidth = 0;
+  let timeout = 0;
+  function resize() {
+    anime.set(el, {scale: 1});
+    if (exception) anime.set(exception, {scale: 1});
+    var pad = padding || 0;
+    var parentEl = el.parentNode;
+    var elOffsetWidth = el.offsetWidth - pad;
+    var parentOffsetWidth = parentEl.offsetWidth;
+    var ratio = parentOffsetWidth / elOffsetWidth;
+    var invertedRatio = elOffsetWidth / parentOffsetWidth;
+    anime.set(el, {scale: ratio});
+    if (exception) anime.set(exception, {scale: invertedRatio});
+  }
+  resize();
+  window.addEventListener('resize', function() {
+    if (window.innerWidth === windowWidth) return;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+      windowWidth = window.innerWidth;
+      resize();
+    }, 15);
+  });
+}
+
+// Update date and version number
+
+var versionNumerEls = document.querySelectorAll('.version-number');
+
+for (var i = 0; i < versionNumerEls.length; i++) {
+  versionNumerEls[i].innerHTML = anime.version;
+}
+
+var dateEl = document.querySelector('.date');
+var date = new Date();
+
+dateEl.innerHTML = date.getFullYear();
+
+// main logo animation
+
+var logoAnimation = (function() {
+
+  var logoAnimationEl = document.querySelector('.logo-animation');
+  var bouncePath = anime.path('.bounce path');
+
+  fitElementToParent(logoAnimationEl, 0, '.bounce svg');
+
+  anime.set(['.letter-a', '.letter-n', '.letter-i'], {translateX: 70});
+  anime.set('.letter-e', {translateX: -70});
+  anime.set('.dot', { translateX: 630, translateY: -200 });
+
+  var logoAnimationTL = anime.timeline({
+    autoplay: false,
+    easing: 'easeOutSine'
+  })
+  .add({
+    targets: '.letter-i .line',
+    duration: 0,
+    begin: function(a) { a.animatables[0].target.removeAttribute('stroke-dasharray'); }
+  }, 0)
+  .add({
+    targets: '.bounced',
+    transformOrigin: ['50% 100% 0px', '50% 100% 0px'],
+    translateY: [
+      {value: [150, -160], duration: 190, endDelay: 20, easing: 'cubicBezier(0.225, 1, 0.915, 0.980)'},
+      {value: 4, duration: 120, easing: 'easeInQuad'},
+      {value: 0, duration: 120, easing: 'easeOutQuad'}
+    ],
+    scaleX: [
+      {value: [.25, .85], duration: 190, easing: 'easeOutQuad'},
+      {value: 1.08, duration: 120, delay: 85, easing: 'easeInOutSine'},
+      {value: 1, duration: 260, delay: 25, easing: 'easeOutQuad'}
+    ],
+    scaleY: [
+      {value: [.3, .8], duration: 120, easing: 'easeOutSine'},
+      {value: .35, duration: 120, delay: 180, easing: 'easeInOutSine'},
+      {value: .57, duration: 180, delay: 25, easing: 'easeOutQuad'},
+      {value: .5, duration: 190, delay: 15, easing: 'easeOutQuad'}
+    ],
+    delay: anime.stagger(80)
+  })
+  .add({
+    targets: '.dot',
+    opacity: { value: 1, duration: 100 },
+    translateY: 250,
+    scaleY: [4, .7],
+    scaleX: { value: 1.3, delay: 100, duration: 200},
+    duration: 280,
+    easing: 'cubicBezier(0.350, 0.560, 0.305, 1)'
+  }, '-=290')
+  .add({
+    targets: '.letter-m .line',
+    easing: 'easeOutElastic(1, .8)',
+    duration: 600,
+    d: function(el) { return el.dataset.d2 },
+    begin: function(a) { a.animatables[0].target.removeAttribute('stroke-dasharray'); }
+  }, '-=140')
+  .add({
+    targets: ['.letter-a', '.letter-n', '.letter-i', '.letter-e'],
+    translateX: 0,
+    easing: 'easeOutElastic(1, .6)',
+    duration: 800,
+    delay: anime.stagger(40, {from: 2.5}),
+    change: function(a) { a.animatables[2].target.removeAttribute('stroke-dasharray'); }
+  }, '-=600')
+  .add({
+    targets: '.letter-m .line',
+    d: function(el) { return el.dataset.d3 },
+    easing: 'spring(.2, 200, 3, 60)',
+  }, '-=680')
+  .add({
+    targets: '.dot',
+    translateX: bouncePath('x'),
+    translateY: bouncePath('y'),
+    rotate: {value: '1turn', duration: 790},
+    scaleX: { value: 1, duration: 50, easing: 'easeOutSine' },
+    scaleY: [
+      { value: [1, 1.5], duration: 50, easing: 'easeInSine' },
+      { value: 1, duration: 50, easing: 'easeOutExpo' }
+    ],
+    easing: 'cubicBezier(0, .74, 1, .255)',
+    duration: 800
+  }, '-=1273')
+  .add({
+    targets: '.dot',
+    scale: 1,
+    rotate: '1turn',
+    scaleY: {value: .5, duration: 150, delay: 230},
+    translateX: 430,
+    translateY: [
+      {value: 244, duration: 100},
+      {value: 204, duration: 200, delay: 130},
+      {value: 224, duration: 225, easing: 'easeOutQuad', delay: 25}
+    ],
+    duration: 200,
+    easing: 'easeOutSine'
+  }, '-=474')
+  .add({
+    targets: '.letter-i .line',
+    transformOrigin: ['50% 100% 0', '50% 100% 0'],
+    d: function(el) { return el.dataset.d2 },
+    easing: 'cubicBezier(0.400, 0.530, 0.070, 1)',
+    duration: 80
+  }, '-=670')
+  .add({
+    targets: '.logo-letter',
+    translateY: [
+      {value: 40, duration: 150, easing: 'easeOutQuart'},
+      {value: 0, duration: 800, easing: 'easeOutElastic(1, .5)'}
+    ],
+    strokeDashoffset: [anime.setDashoffset, 0],
+    delay: anime.stagger(60, {from: 'center'})
+  }, '-=670')
+  .add({
+    targets: '.bounced',
+    scaleY: [
+      {value: .4, duration: 150, easing: 'easeOutQuart'},
+      {value: .5, duration: 800, easing: 'easeOutElastic(1, .5)'}
+    ],
+    delay: anime.stagger(60, {from: 'center'})
+  }, '-=1090')
+
+  return logoAnimationTL;
+
+})();
+
+var headerIntroAnimation = anime.timeline({
+  easing: 'easeOutSine',
+  autoplay: false
+})
+.add({
+  targets: ['.header a', '.secondary-menu a', '.section-intro .feature-description-text'],
+  opacity: {value: [0.001, 1], easing: 'linear', duration: 300},
+  translateY: [40, 0],
+  translateZ: 0,
+  duration: 500,
+  delay: anime.stagger(40, {start: 400, from: 'last'}),
+  begin: function(anim) {
+    anim.animatables.forEach(function(a) {
+      anime.set(a.target, {
+        transition: 'transform 0s ease'
+      });
+    });
+  },
+  complete: function(anim) {
+    logoAnimation.play();
+    anim.animatables.forEach(function(a) {
+      a.target.style = '';
+      anime.set(a.target, {
+        opacity: 1,
+        transition: 'transform .225s ease'
+      });
+    });
+  }
+}, 0);
+
+var introEasingsAnimation = (function() {
+
+  var easingVisualizerEl = document.querySelector('.easing-visualizer');
+  var barsWrapperEl = easingVisualizerEl.querySelector('.bars-wrapper');
+  var dotsWrapperEl = easingVisualizerEl.querySelector('.dots-wrapper');
+  var barsFragment = document.createDocumentFragment();
+  var dotsFragment = document.createDocumentFragment();
+  var numberOfBars = 91;
+  var duration = 450;
+  var animation;
+  var paused = true;
+
+  fitElementToParent(easingVisualizerEl);
+
+  for (var i = 0; i < numberOfBars; i++) {
+    var barEl = document.createElement('div');
+    var dotEl = document.createElement('div');
+    barEl.classList.add('bar');
+    dotEl.classList.add('dot');
+    dotEl.classList.add('color-red');
+    barsFragment.appendChild(barEl);
+    dotsFragment.appendChild(dotEl);
+  }
+
+  barsWrapperEl.appendChild(barsFragment);
+  dotsWrapperEl.appendChild(dotsFragment);
+
+  var defaultEase = 'easeOutElastic';
+
+  function play() {
+
+    paused = false;
+
+    if (animation) animation.pause();
+
+    var easings = [];
+    for (let ease in anime.penner) easings.push(ease);
+    easings.push('steps('+anime.random(5, 20)+')');
+    easings.push('steps('+anime.random(5, 20)+')');
+    easings.push('cubicBezier(0.545, 0.475, 0.145, 1)');
+    var ease = easings[anime.random(0, easings.length - 1)];
+
+    animation = anime.timeline({
+      duration: duration,
+      easing: ease,
+      complete: play
+    })
+    .add({
+      targets: '.easing-visualizer .bar',
+      scaleY: anime.stagger([1, 44], {easing: ease, from: 'center', direction: 'reverse'}),
+      delay: anime.stagger(7, {from: 'center'})
+    })
+    .add({
+      targets: '.easing-visualizer .dot',
+      translateY: anime.stagger(['-160px', '160px'], {easing: ease, from: 'last'}),
+      delay: anime.stagger(7, {from: 'center'})
+    }, 0);
+
+  }
+
+  function pause() {
+
+    if (paused) return;
+    paused = true;
+    if (animation) animation.pause();
+
+    animation = anime.timeline({
+      easing: 'easeInOutQuad'
+    })
+    .add({
+      targets: '.easing-visualizer .bar',
+      scaleY: anime.stagger([1, 44], {easing: defaultEase, from: 'center', direction: 'reverse'}),
+      duration: duration,
+      delay: anime.stagger(7, {from: 'center'})
+    })
+    .add({
+      targets: '.easing-visualizer .dot',
+      translateY: anime.stagger(['-144px', '144px'], {easing: defaultEase, from: 'last'}),
+      duration: duration,
+      delay: anime.stagger(7, {from: 'center'})
+    }, 0);
+
+  }
+
+  function init() {
+
+    animation = anime.timeline({
+      duration: 600,
+      easing: 'easeInOutQuad',
+      complete: function() {
+        isElementInViewport(easingVisualizerEl, play, pause);
+      }
+    })
+    .add({
+      targets: '.easing-visualizer .bar',
+      scale: [0, 1],
+      delay: anime.stagger(8, {from: 'center'})
+    })
+    .add({
+      targets: '.easing-visualizer .dot',
+      scale: [0, 1],
+      delay: anime.stagger(8, {from: 'center'}),
+      complete: function() {
+        headerIntroAnimation.play();
+      }
+    }, 0)
+    .add({
+      targets: '.easing-visualizer .bar',
+      scaleY: anime.stagger([1, 44], {easing: 'easeInOutQuad', from: 'center', direction: 'reverse'}),
+      duration: duration,
+      easing: 'easeInOutQuad',
+      delay: anime.stagger(7, {from: 'center'})
+    })
+    .add({
+      targets: '.easing-visualizer .dot',
+      translateY: anime.stagger(['-144px', '144px'], {easing: 'easeInOutQuad', from: 'last'}),
+      duration: duration,
+      easing: 'easeInOutQuad',
+      delay: anime.stagger(7, {from: 'center'})
+    }, '-=600');
+
+
+  }
+
+  return {
+    init: init,
+    play: play,
+    pause: pause
+  }
+
+})();
+
+var sphereAnimation = (function() {
+
+  var sphereEl = document.querySelector('.sphere-animation');
+  var spherePathEls = sphereEl.querySelectorAll('.sphere path');
+  var pathLength = spherePathEls.length;
+  var introPlayed = false;
+  var aimations = [];
+
+  var breathAnimation = anime({
+    begin: function() {
+      for (var i = 0; i < pathLength; i++) {
+        aimations.push(anime({
+          targets: spherePathEls[i],
+          stroke: {value: ['rgba(255,75,75,1)', 'rgba(80,80,80,.35)'], duration: 500},
+          translateX: [2, -4],
+          translateY: [2, -4],
+          easing: 'easeOutQuad',
+          autoplay: false
+        }));
+      }
+    },
+    update: function(ins) {
+      aimations.forEach(function(animation, i) {
+        var percent = (1 - Math.sin((i * .35) + (.0022 * ins.currentTime))) / 2;
+        animation.seek(animation.duration * percent);
+      });
+    },
+    duration: Infinity,
+    autoplay: false
+  });
+
+  var introAnimation = anime.timeline({
+    autoplay: false
+  })
+  .add({
+    targets: sphereEl,
+    opacity: [.001, 1],
+    translateY: [60, 0],
+    duration: 2000,
+    easing: 'easeOutSine',
+  }, 0)
+  .add({
+    targets: spherePathEls,
+    strokeDashoffset: {
+      value: [anime.setDashoffset, 0],
+      duration: 3900,
+      easing: 'easeInOutCirc',
+      delay: anime.stagger(190, {direction: 'reverse'})
+    },
+    duration: 2000,
+    delay: anime.stagger(60, {direction: 'reverse'}),
+    easing: 'linear'
+  }, 0);
+
+  var shadowAnimation = anime({
+      targets: '#sphereGradient',
+      x1: '25%',
+      x2: '25%',
+      y1: '0%',
+      y2: '75%',
+      duration: 30000,
+      easing: 'easeOutQuint',
+      autoplay: false
+    }, 0);
+
+  function play() {
+    if (!introPlayed) {
+      introAnimation.play();
+      introPlayed = true;
+    }
+    breathAnimation.play();
+    shadowAnimation.play();
+  }
+
+  function pause() {
+    breathAnimation.pause();
+    shadowAnimation.pause();
+  }
+
+  isElementInViewport(sphereEl, play, pause);
+
+})();
+
+var advancedStaggeringAnimation = (function() {
+
+  var staggerVisualizerEl = document.querySelector('.stagger-visualizer');
+  var dotsWrapperEl = staggerVisualizerEl.querySelector('.dots-wrapper');
+  var dotsFragment = document.createDocumentFragment();
+  var grid = [20, 10];
+  var cell = 55;
+  var numberOfElements = grid[0] * grid[1];
+  var animation;
+  var paused = true;
+
+  fitElementToParent(staggerVisualizerEl);
+
+  for (var i = 0; i < numberOfElements; i++) {
+    var dotEl = document.createElement('div');
+    dotEl.classList.add('dot');
+    dotsFragment.appendChild(dotEl);
+  }
+
+  dotsWrapperEl.appendChild(dotsFragment);
+
+  var index = anime.random(0, numberOfElements-1);
+  var nextIndex = 0;
+
+  anime.set('.stagger-visualizer .cursor', {
+    translateX: anime.stagger(-cell, {grid: grid, from: index, axis: 'x'}),
+    translateY: anime.stagger(-cell, {grid: grid, from: index, axis: 'y'}),
+    translateZ: 0,
+    scale: 1.5,
+  });
+
+  function play() {
+
+    paused = false;
+    if (animation) animation.pause();
+
+    nextIndex = anime.random(0, numberOfElements-1);
+
+    animation = anime.timeline({
+      easing: 'easeInOutQuad',
+      complete: play
+    })
+    .add({
+      targets: '.stagger-visualizer .cursor',
+      keyframes: [
+        { scale: .75, duration: 120}, 
+        { scale: 2.5, duration: 220},
+        { scale: 1.5, duration: 450},
+      ],
+      duration: 300
+    })
+    .add({
+      targets: '.stagger-visualizer .dot',
+      keyframes: [
+        {
+          translateX: anime.stagger('-2px', {grid: grid, from: index, axis: 'x'}),
+          translateY: anime.stagger('-2px', {grid: grid, from: index, axis: 'y'}),
+          duration: 100
+        }, {
+          translateX: anime.stagger('4px', {grid: grid, from: index, axis: 'x'}),
+          translateY: anime.stagger('4px', {grid: grid, from: index, axis: 'y'}),
+          scale: anime.stagger([2.6, 1], {grid: grid, from: index}),
+          duration: 225
+        }, {
+          translateX: 0,
+          translateY: 0,
+          scale: 1,
+          duration: 1200,
+        }
+      ],
+      delay: anime.stagger(80, {grid: grid, from: index})
+    }, 30)
+    .add({
+      targets: '.stagger-visualizer .cursor',
+      translateX: { value: anime.stagger(-cell, {grid: grid, from: nextIndex, axis: 'x'}) },
+      translateY: { value: anime.stagger(-cell, {grid: grid, from: nextIndex, axis: 'y'}) },
+      scale: 1.5,
+      easing: 'cubicBezier(.075, .2, .165, 1)'
+    }, '-=800')
+
+    index = nextIndex;
+
+  }
+
+  function pause() {
+
+    if (paused) return;
+    paused = true;
+    if (animation) animation.pause();
+
+    animation = anime.timeline({
+      easing: 'easeInOutQuad',
+      duration: 100
+    })
+    .add({
+      targets: '.cursor',
+      translateX: { value: anime.stagger(-cell, {grid: grid, from: index, axis: 'x'}) },
+      translateY: { value: anime.stagger(-cell, {grid: grid, from: index, axis: 'y'}) },
+      scale: 1,
+    })
+    .add({
+      targets: '.stagger-visualizer .dot',
+      translateX: 0,
+      translateY: 0,
+      scale: 1,
+      delay: anime.stagger(50, {grid: grid, from: index})
+    }, 0)
+
+  }
+
+  isElementInViewport(staggerVisualizerEl, play, pause);
+
+  return {
+    play: play,
+    pause: pause
+  }
+
+})();
+
+var timeControlAnimation = (function() {
+
+  var timeControlEl = document.querySelector('.time-control');
+  var rullerEl = document.querySelector('.ruller');
+  var timeCursorEl = document.querySelector('.time-cursor');
+  var timeEl = document.querySelector('.time-cursor input');
+  var infoEls = document.querySelectorAll('.info');
+  var fragment = document.createDocumentFragment();
+  var numberOfElements = 271;
+  var controlAnimationCanMove = false;
+
+  for (let i = 0; i < numberOfElements; i++) {
+    var dotEl = document.createElement('div');
+    dotEl.classList.add('line');
+    fragment.appendChild(dotEl);
+  }
+
+  rullerEl.appendChild(fragment);
+
+  var animationPXOffset = (timeControlEl.offsetWidth - (timeControlEl.parentNode.offsetWidth - 20)) / 2;
+  if (animationPXOffset < 0) animationPXOffset = 0;
+
+  function pxToTime(px) {
+    var width = window.innerWidth > rullerEl.offsetWidth ? rullerEl.offsetWidth + 180 : window.innerWidth;
+    var percent = px / (width);
+    return percent * (timelineAnimation.duration);
+  }
+
+  var time = {
+    anim: null,
+    start: 0,
+    end: 0
+  };
+
+  var drag = dragElement(timeCursorEl, {
+    begin: function(e) {
+      anime.remove(time);
+      time.start = timelineAnimation.currentTime;
+      controlAnimationCanMove = false;
+    },
+    move: function(e) {
+      timelineAnimation.seek(time.start + pxToTime(-e.deltaX));
+    },
+    release: function(e) {
+      time.end = timelineAnimation.currentTime;
+      anime.remove(time);
+      time.anim = anime({
+        targets: time,
+        end: time.start,
+        easing: 'spring(.3, 200, 5, 1)',
+        update: function() { timelineAnimation.seek(time.end); },
+        complete: function() { 
+          controlAnimationCanMove = true;
+          moveControlAnimation();
+        }
+      });
+    }
+  });
+
+  var timelineAnimation = anime.timeline({
+    easing: 'linear',
+    autoplay: false
+  })
+  .add({
+    targets: timeControlEl,
+    translateX: [animationPXOffset, -animationPXOffset],
+    duration: 1500
+  }, 0)
+  .add({
+    targets: timeCursorEl,
+    translateZ: 0,
+    keyframes: [
+      { translateY: [-24, 0], duration: 100, easing: 'easeInQuad' },
+      { translateX: 1080, duration: 1500 },
+      { translateY: -24, duration: 100, easing: 'easeOutQuad' }
+    ],
+    duration: 1500
+  }, -100)
+  .add({
+    targets: '.ruller .line',
+    translateY: [ {value: 24}, {value: 0} ],
+    duration: 160,
+    delay: anime.stagger([0, 1500]),
+    easing: 'easeInOutSine'
+  }, -80)
+  .add({
+    targets: timeEl,
+    value: [ {value: [0, 100]}, {value: 0}, {value: 100} ],
+    duration: 1500,
+    round: 1,
+    easing: 'linear'
+  }, 0)
+
+  for (var i = 0; i < infoEls.length; i++) {
+    var infoEl = infoEls[i];
+    var delay = parseFloat(anime.get(infoEl, 'data-delay'));
+    var direction = infoEl.classList.contains('info-bottom') ? -1 : 1;
+    timelineAnimation
+    .add({
+      targets: infoEl.querySelector('.info-bar'),
+      scaleY: [0, 1],
+      duration: 250,
+      easing: 'easeOutCirc'
+    }, delay)
+    .add({
+      targets: infoEl.querySelectorAll('.info .feature-caption'),
+      opacity: [0, 1],
+      translateY: [direction * 10, 0],
+      duration: 50,
+      delay: anime.stagger(50, {start: 10, direction: direction > 0 ? 'reverse' : 'normal'}),
+      easing: 'easeOutSine'
+    }, delay)
+  }
+
+  var windowHeight = window.innerHeight;
+  var scrollAnim;
+
+  function moveControlAnimation() {
+    var rect = timeControlEl.getBoundingClientRect();
+    var top = rect.top;
+    var height = rect.height;
+    var scrolled = (top - windowHeight + 100) * -1.5;
+    timelineAnimation.seek(scrolled * 2);
+    if (controlAnimationCanMove) scrollAnim = requestAnimationFrame(moveControlAnimation);
+  }
+
+  isElementInViewport(timeControlEl, function(el, entry) {
+    windowHeight = window.innerHeight;
+    controlAnimationCanMove = true;
+    moveControlAnimation();
+  }, function(el, entry) {
+    controlAnimationCanMove = false;
+  }, '50px');
+
+  onScroll(function() {
+    if (time.anim && !time.anim.paused) {
+      time.anim.pause();
+      controlAnimationCanMove = true;
+      moveControlAnimation();
+    }
+  });
+
+})();
+
+var layeredAnimation = (function() {
+
+  var transformEls = document.querySelectorAll('.transform-progress');
+  var layeredAnimationEl = document.querySelector('.layered-animations');
+  var shapeEls = layeredAnimationEl.querySelectorAll('.shape');
+  var triangleEl = layeredAnimationEl.querySelector('polygon');
+  var trianglePoints = triangleEl.getAttribute('points').split(' ');
+  var easings = ['easeInOutQuad', 'easeInOutCirc', 'easeInOutSine', 'spring'];
+
+  fitElementToParent(layeredAnimationEl);
+
+  function createKeyframes(value) {
+    var keyframes = [];
+    for (var i = 0; i < 30; i++) keyframes.push({ value: value });
+    return keyframes;
+  }
+
+  function animateShape(el) {
+
+    var circleEl = el.querySelector('circle');
+    var rectEl = el.querySelector('rect');
+    var polyEl = el.querySelector('polygon');
+
+    var animation = anime.timeline({
+      targets: el,
+      duration: function() { return anime.random(600, 2200); },
+      easing: function() { return easings[anime.random(0, easings.length - 1)]; },
+      complete: function(anim) { animateShape(anim.animatables[0].target); },
+    })
+    .add({
+      translateX: createKeyframes(function(el) { 
+        return el.classList.contains('large') ? anime.random(-300, 300) : anime.random(-520, 520);
+      }),
+      translateY: createKeyframes(function(el) { 
+        return el.classList.contains('large') ? anime.random(-110, 110) : anime.random(-280, 280);
+      }),
+      rotate: createKeyframes(function() { return anime.random(-180, 180); }),
+    }, 0);
+    if (circleEl) {
+      animation.add({
+        targets: circleEl,
+        r: createKeyframes(function() { return anime.random(32, 72); }),
+      }, 0);
+    }
+    if (rectEl) {
+      animation.add({
+        targets: rectEl,
+        width: createKeyframes(function() { return anime.random(64, 120); }),
+        height: createKeyframes(function() { return anime.random(64, 120); }),
+      }, 0);
+    }
+    if (polyEl) {
+      animation.add({
+        targets: polyEl,
+        points: createKeyframes(function() { 
+          var scale = anime.random(72, 180) / 100;
+          return trianglePoints.map(function(p) { return p * scale; }).join(' ');
+        }),
+      }, 0);
+    }
+
+    isElementInViewport(layeredAnimationEl, animation.play, animation.pause);
+
+  }
+
+  for (var i = 0; i < shapeEls.length; i++) {
+    animateShape(shapeEls[i]);
+  }
+
+  function animateProgress(el) {
+    var animation = anime.timeline({
+      targets: el,
+      duration: function() { return anime.random(400, 1800); },
+      easing: function() { return easings[anime.random(0, easings.length - 2)]; },
+      complete: function(anim) { animateProgress(anim.animatables[0].target); },
+    })
+    .add({
+      transformOrigin: createKeyframes(function(el) { 
+        return anime.random(0, 100) + '%';
+      })
+    }, 0)
+    .add({
+      scaleX: createKeyframes(function(el) { 
+        return anime.random(10, 100) / 100;
+      })
+    }, 0);
+    isElementInViewport(layeredAnimationEl, animation.play, animation.pause);
+  }
+
+  for (var i = 0; i < transformEls.length; i++) {
+    animateProgress(transformEls[i]);
+  }
+
+})();
+
+var scrollToGettingStartedLink = document.querySelector('.scroll-to-getting-started');
+
+scrollToGettingStartedLink.addEventListener('click', function(e) {
+  e.preventDefault();
+  scrollToElement(document.querySelector('#getting-started'));
+})
+
+window.onload = introEasingsAnimation.init;
+
+
+
+
+
+function fitElementToParent(el, padding) {
+  var timeout = null;
+  function resize() {
+    if (timeout) clearTimeout(timeout);
+    anime.set(el, {scale: 1});
+    var pad = padding || 0;
+    var parentEl = el.parentNode;
+    var elOffsetWidth = el.offsetWidth - pad;
+    var parentOffsetWidth = parentEl.offsetWidth;
+    var ratio = parentOffsetWidth / elOffsetWidth;
+    timeout = setTimeout(anime.set(el, {scale: ratio}), 10);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+}
+
+var advancedStaggeringAnimation = (function() {
+
+  var staggerVisualizerEl = document.querySelector('.stagger-visualizer');
+  var dotsWrapperEl = staggerVisualizerEl.querySelector('.dots-wrapper');
+  var dotsFragment = document.createDocumentFragment();
+  var grid = [20, 10];
+  var cell = 55;
+  var numberOfElements = grid[0] * grid[1];
+  var animation;
+  var paused = true;
+  
+  fitElementToParent(staggerVisualizerEl, 0);
+
+  for (var i = 0; i < numberOfElements; i++) {
+    var dotEl = document.createElement('div');
+    dotEl.classList.add('dot');
+    dotsFragment.appendChild(dotEl);
+  }
+
+  dotsWrapperEl.appendChild(dotsFragment);
+
+  var index = anime.random(0, numberOfElements-1);
+  var nextIndex = 0;
+
+  anime.set('.stagger-visualizer .cursor', {
+    translateX: anime.stagger(-cell, {grid: grid, from: index, axis: 'x'}),
+    translateY: anime.stagger(-cell, {grid: grid, from: index, axis: 'y'}),
+    translateZ: 0,
+    scale: 1.5,
+  });
+
+  function play() {
+
+    paused = false;
+    if (animation) animation.pause();
+
+    nextIndex = anime.random(0, numberOfElements-1);
+
+    animation = anime.timeline({
+      easing: 'easeInOutQuad',
+      complete: play
+    })
+    .add({
+      targets: '.stagger-visualizer .cursor',
+      keyframes: [
+        { scale: .75, duration: 120}, 
+        { scale: 2.5, duration: 220},
+        { scale: 1.5, duration: 450},
+      ],
+      duration: 300
+    })
+    .add({
+      targets: '.stagger-visualizer .dot',
+      keyframes: [
+        {
+          translateX: anime.stagger('-2px', {grid: grid, from: index, axis: 'x'}),
+          translateY: anime.stagger('-2px', {grid: grid, from: index, axis: 'y'}),
+          duration: 100
+        }, {
+          translateX: anime.stagger('4px', {grid: grid, from: index, axis: 'x'}),
+          translateY: anime.stagger('4px', {grid: grid, from: index, axis: 'y'}),
+          scale: anime.stagger([2.6, 1], {grid: grid, from: index}),
+          duration: 225
+        }, {
+          translateX: 0,
+          translateY: 0,
+          scale: 1,
+          duration: 1200,
+        }
+      ],
+      delay: anime.stagger(80, {grid: grid, from: index})
+    }, 30)
+    .add({
+      targets: '.stagger-visualizer .cursor',
+      translateX: { value: anime.stagger(-cell, {grid: grid, from: nextIndex, axis: 'x'}) },
+      translateY: { value: anime.stagger(-cell, {grid: grid, from: nextIndex, axis: 'y'}) },
+      scale: 1.5,
+      easing: 'cubicBezier(.075, .2, .165, 1)'
+    }, '-=800')
+
+    index = nextIndex;
+
+  }
+
+  play();
+
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+    </script>
+</body>
+
+</html>
+function fitElementToParent(el, padding) {
+  var timeout = null;
+  function resize() {
+    if (timeout) clearTimeout(timeout);
+    anime.set(el, {scale: 1});
+    var pad = padding || 0;
+    var parentEl = el.parentNode;
+    var elOffsetWidth = el.offsetWidth - pad;
+    var parentOffsetWidth = parentEl.offsetWidth;
+    var ratio = parentOffsetWidth / elOffsetWidth;
+    timeout = setTimeout(anime.set(el, {scale: ratio}), 10);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+}
+
+var advancedStaggeringAnimation = (function() {
+
+  var staggerVisualizerEl = document.querySelector('.stagger-visualizer');
+  var dotsWrapperEl = staggerVisualizerEl.querySelector('.dots-wrapper');
+  var dotsFragment = document.createDocumentFragment();
+  var grid = [20, 10];
+  var cell = 55;
+  var numberOfElements = grid[0] * grid[1];
+  var animation;
+  var paused = true;
+  
+  fitElementToParent(staggerVisualizerEl, 0);
+
+  for (var i = 0; i < numberOfElements; i++) {
+    var dotEl = document.createElement('div');
+    dotEl.classList.add('dot');
+    dotsFragment.appendChild(dotEl);
+  }
+
+  dotsWrapperEl.appendChild(dotsFragment);
+
+  var index = anime.random(0, numberOfElements-1);
+  var nextIndex = 0;
+
+  anime.set('.stagger-visualizer .cursor', {
+    translateX: anime.stagger(-cell, {grid: grid, from: index, axis: 'x'}),
+    translateY: anime.stagger(-cell, {grid: grid, from: index, axis: 'y'}),
+    translateZ: 0,
+    scale: 1.5,
+  });
+
+  function play() {
+
+    paused = false;
+    if (animation) animation.pause();
+
+    nextIndex = anime.random(0, numberOfElements-1);
+
+    animation = anime.timeline({
+      easing: 'easeInOutQuad',
+      complete: play
+    })
+    .add({
+      targets: '.stagger-visualizer .cursor',
+      keyframes: [
+        { scale: .75, duration: 120}, 
+        { scale: 2.5, duration: 220},
+        { scale: 1.5, duration: 450},
+      ],
+      duration: 300
+    })
+    .add({
+      targets: '.stagger-visualizer .dot',
+      keyframes: [
+        {
+          translateX: anime.stagger('-2px', {grid: grid, from: index, axis: 'x'}),
+          translateY: anime.stagger('-2px', {grid: grid, from: index, axis: 'y'}),
+          duration: 100
+        }, {
+          translateX: anime.stagger('4px', {grid: grid, from: index, axis: 'x'}),
+          translateY: anime.stagger('4px', {grid: grid, from: index, axis: 'y'}),
+          scale: anime.stagger([2.6, 1], {grid: grid, from: index}),
+          duration: 225
+        }, {
+          translateX: 0,
+          translateY: 0,
+          scale: 1,
+          duration: 1200,
+        }
+      ],
+      delay: anime.stagger(80, {grid: grid, from: index})
+    }, 30)
+    .add({
+      targets: '.stagger-visualizer .cursor',
+      translateX: { value: anime.stagger(-cell, {grid: grid, from: nextIndex, axis: 'x'}) },
+      translateY: { value: anime.stagger(-cell, {grid: grid, from: nextIndex, axis: 'y'}) },
+      scale: 1.5,
+      easing: 'cubicBezier(.075, .2, .165, 1)'
+    }, '-=800')
+
+    index = nextIndex;
+
+  }
+
+  play();
+
+})();
